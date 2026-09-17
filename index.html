@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>장당중학교 가정통신문 자동 생성기</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .container { max-width: 850px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h2 { text-align: center; color: #1a365d; margin-bottom: 25px; border-bottom: 3px solid #2b6cb0; padding-bottom: 12px; font-size: 24px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-weight: bold; margin-bottom: 6px; color: #2d3748; font-size: 14px; }
+        input[type="text"], input[type="date"], select, textarea {
+            width: 100%; padding: 10px 12px; border: 1px solid #cbd5e0; border-radius: 5px; font-size: 14px; outline: none;
+        }
+        input:focus, textarea:focus { border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49,130,206,0.15); }
+        textarea { height: 220px; resize: vertical; line-height: 1.6; }
+        .row { display: flex; gap: 15px; }
+        .col { flex: 1; }
+        .file-upload { background: #f7fafc; padding: 15px; border-radius: 6px; border: 2px dashed #cbd5e0; text-align: center; }
+        .radio-group { display: flex; gap: 20px; margin-top: 6px; background: #edf2f7; padding: 10px 15px; border-radius: 6px; }
+        .radio-group label { font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 6px; margin: 0; }
+        button {
+            width: 100%; padding: 15px; background-color: #2b6cb0; color: white; border: none;
+            border-radius: 6px; font-size: 17px; font-weight: bold; cursor: pointer; transition: background 0.2s;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #2c5282; }
+        .preview-box { margin-top: 20px; padding: 18px; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 6px; display: none; }
+        .preview-box h4 { margin-top: 0; color: #2c5282; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🏫 장당중학교 가정통신문 자동 생성기</h2>
+
+    <!-- 1. 기본 정보 입력 -->
+    <div class="row">
+        <div class="form-group col">
+            <label for="deptName">담당부서</label>
+            <input type="text" id="deptName" value="정보과학부" placeholder="예: 정보과학부, 창의체험부">
+        </div>
+        <div class="form-group col">
+            <label for="phone">담당자 (연락처)</label>
+            <input type="text" id="phone" value="031-615-3554" placeholder="예: 031-615-3554">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col">
+            <label for="title">가정통신문 제목</label>
+            <input type="text" id="title" placeholder="예: 2026학년도 현장체험학습 신청 안내">
+        </div>
+        <div class="form-group col">
+            <label for="docDate">발송 일자</label>
+            <input type="date" id="docDate">
+        </div>
+    </div>
+
+    <!-- 2. 문서 유형 선택 -->
+    <div class="form-group">
+        <label>문서 유형</label>
+        <div class="radio-group">
+            <label><input type="radio" name="docType" value="dispatch" checked onclick="toggleReturnForm(false)"> 📄 일반 배포용</label>
+            <label><input type="radio" name="docType" value="return" onclick="toggleReturnForm(true)"> ✂️ 회수용 (절취선 및 동의서 포함)</label>
+        </div>
+    </div>
+
+    <!-- 3. 참고 문서 업로드 및 본문 작성 -->
+    <div class="form-group">
+        <label>참고 문서 업로드 (선택사항)</label>
+        <div class="file-upload">
+            <input type="file" id="fileInput" accept=".txt" onchange="handleFileUpload(event)">
+            <div style="color: #718096; font-size: 12px; margin-top: 6px;">※ .txt 참고 문서를 선택하면 본문에 내용이 자동으로 들어갑니다.</div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="content">가정통신문 본문 내용</label>
+        <textarea id="content" placeholder="여기에 가정통신문 안내 본문 내용을 입력하세요."></textarea>
+    </div>
+
+    <!-- 4. 회수용 옵션 -->
+    <div id="returnOptions" class="preview-box">
+        <h4>[ 회수용 동의서 양식 설정 ]</h4>
+        <div class="form-group">
+            <label for="returnTitle">동의서 제목</label>
+            <input type="text" id="returnTitle" value="현장체험학습 참가 동의서">
+        </div>
+        <div class="form-group">
+            <label for="returnItems">동의 선택 항목</label>
+            <input type="text" id="returnItems" value="참가 (   ) / 불참 (   )">
+        </div>
+    </div>
+
+    <button onclick="generateHWP()">💾 HWP 가정통신문 생성 및 다운로드</button>
+</div>
+
+<script>
+    // 교표 이미지 Base64 데이터
+    const schoolLogoBase64 = "data:image/png;base64,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";
+
+    // 오늘 날짜 자동 입력
+    document.getElementById('docDate').value = new Date().toISOString().substring(0, 10);
+
+    // .txt 참고 파일 업로드 처리
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('content').value = e.target.result;
+        };
+        reader.readAsText(file, 'EUC-KR');
+    }
+
+    // 회수용 영역 표시 토글
+    function toggleReturnForm(show) {
+        document.getElementById('returnOptions').style.display = show ? 'block' : 'none';
+    }
+
+    // 장당중학교 양식 HWP 생성 함수
+    function generateHWP() {
+        const deptName = document.getElementById('deptName').value || "정보과학부";
+        const phone = document.getElementById('phone').value || "031-615-3554";
+        const title = document.getElementById('title').value || "제목을 입력하세요";
+        const rawDate = document.getElementById('docDate').value;
+        
+        let formattedDate = "2026년  월  일";
+        if (rawDate) {
+            const d = new Date(rawDate);
+            formattedDate = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+        }
+
+        const content = document.getElementById('content').value.replace(/\n/g, "<br>") || "본문 내용을 입력하세요.";
+        const isReturn = document.querySelector('input[name="docType"]:checked').value === 'return';
+
+        // 장당중학교 고유 양식 HTML 구조 적용
+        let htmlContent = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:h="http://www.haansoft.com/hwp">
+        <head>
+            <meta charset="utf-8">
+            <title>학부모님께</title>
+            <style>
+                body { font-family: '한컴바탕', '맑은 고딕', sans-serif; line-height: 1.6; margin: 0; padding: 20mm; }
+                .slogan { text-align: center; font-size: 11pt; font-weight: bold; padding: 4px 0; }
+                
+                /* 상단 표 스타일 */
+                .header-table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 25px; }
+                .header-table td { border: 1px solid #000; text-align: center; vertical-align: middle; padding: 5px; font-size: 10pt; }
+                .bg-gray { background-color: #f2f2f2; }
+                
+                .title-box { text-align: left; font-size: 14pt; font-weight: bold; border: 1px solid #000; padding: 8px 12px; margin-bottom: 30px; }
+                
+                /* 본문 스타일 */
+                .content-box { font-size: 11pt; min-height: 300px; text-align: justify; line-height: 1.8; margin-bottom: 40px; }
+                
+                /* 하단 날짜 및 장당중학교장 */
+                .footer-date { text-align: center; font-size: 12pt; margin-top: 30px; letter-spacing: 2px; }
+                .school-title { text-align: center; font-size: 18pt; font-weight: bold; margin-top: 20px; letter-spacing: 4px; }
+                .school-title span { font-size: 11pt; font-weight: normal; letter-spacing: 0; margin-left: 10px; }
+
+                /* 절취선 및 회수용 표 */
+                .cut-line { border-top: 2px dashed #000; margin: 35px 0 20px 0; text-align: center; position: relative; }
+                .cut-line span { background: #fff; padding: 0 10px; font-size: 9pt; position: relative; top: -11px; }
+                .return-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                .return-table th, .return-table td { border: 1px solid #000; padding: 8px; text-align: center; font-size: 10.5pt; }
+            </style>
+        </head>
+        <body>
+
+            <!-- 상단 슬로건 -->
+            <div class="slogan">“자율 · 공감 · 공존”</div>
+
+            <!-- 장당중학교 표준 상단 헤더 표 -->
+            <table class="header-table">
+                <tr>
+                    <td rowspan="2" style="width: 15%; padding: 3px;">
+                        <img src="${schoolLogoBase64}" style="width: 55px; height: auto;" alt="교표">
+                    </td>
+                    <td style="width: 22%;" class="bg-gray"><b>교  훈(校訓)</b></td>
+                    <td rowspan="2" style="width: 31%; font-size: 16pt; font-weight: bold;">가정통신문<br><span style="font-size:8pt; font-weight:normal;">https://jangdang-m.goept.kr/</span></td>
+                    <td style="width: 32%;">담당부서 : ${deptName}</td>
+                </tr>
+                <tr>
+                    <td>자주 · 성실 · 창의</td>
+                    <td>담당자 : ${phone}</td>
+                </tr>
+            </table>
+
+            <!-- 제목 -->
+            <div class="title-box">제목 : ${title}</div>
+
+            <!-- 본문 내용 -->
+            <div class="content-box">
+                ${content}
+            </div>
+
+            <!-- 발송 날짜 및 관인 -->
+            <div class="footer-date">${formattedDate}</div>
+            <div class="school-title">장 당 중 학 교 장 <span>[관인생략]</span></div>
+        `;
+
+        // 회수용 선택 시 추가할 HTML
+        if (isReturn) {
+            const returnTitle = document.getElementById('returnTitle').value;
+            const returnItems = document.getElementById('returnItems').value;
+
+            htmlContent += `
+            <div class="cut-line"><span>------- ✂ ------- 절 ----- 취 ----- 선 ------- ✂ -------</span></div>
+
+            <h3 style="text-align: center; margin-bottom: 15px;">${returnTitle}</h3>
+            <table class="return-table">
+                <tr>
+                    <th style="width: 15%; class="bg-gray">학년 / 반</th>
+                    <td style="width: 35%;">학년   반   번</td>
+                    <th style="width: 15%; class="bg-gray">학생 성명</th>
+                    <td style="width: 35%;"></td>
+                </tr>
+                <tr>
+                    <th class="bg-gray">동의 여부</th>
+                    <td colspan="3">${returnItems}</td>
+                </tr>
+                <tr>
+                    <th class="bg-gray">보호자 확인</th>
+                    <td colspan="3" style="text-align: right; padding-right: 30px; height: 35px;">
+                        보호자 성명: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(인/서명)
+                    </td>
+                </tr>
+            </table>
+            <p style="font-size: 11pt; text-align: center; margin-top: 15px; font-weight: bold;">장당중학교장 귀하</p>
+            `;
+        }
+
+        htmlContent += `
+        </body>
+        </html>
+        `;
+
+        // HWP 다운로드 실행
+        const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/x-hwp;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${title}.hwp`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>
