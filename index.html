@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>2026학년도 수업공개의 날</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
+            background: #f5f7fb;
+            color: #222;
+        }
+
+        /* 상단 */
+        header {
+            background: #315efb;
+            color: white;
+            text-align: center;
+            padding: 38px 20px;
+        }
+
+        header h1 {
+            margin: 0 0 10px;
+            font-size: 30px;
+        }
+
+        header p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        /* 전체 영역 */
+        .container {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 18px;
+        }
+
+        /* 수업 카드 */
+        .class-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .class-card {
+            background: white;
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+
+        .class-card:hover {
+            transform: translateY(-3px);
+            border-color: #315efb;
+        }
+
+        .class-number {
+            color: #315efb;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .class-card h3 {
+            margin: 0 0 12px;
+            font-size: 20px;
+        }
+
+        .class-card p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* 수업 상세 */
+        .detail-box {
+            display: none;
+            background: white;
+            margin-top: 25px;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .detail-box.active {
+            display: block;
+        }
+
+        .detail-title {
+            margin-top: 0;
+            font-size: 25px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .info-table th,
+        .info-table td {
+            border: 1px solid #ddd;
+            padding: 14px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .info-table th {
+            width: 120px;
+            background: #f1f4fa;
+        }
+
+        /* 버튼 */
+        .action-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 25px;
+        }
+
+        .action-box {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 14px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .action-box:hover {
+            transform: translateY(-3px);
+            border-color: #315efb;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .action-icon {
+            font-size: 35px;
+            margin-bottom: 8px;
+        }
+
+        .action-box h3 {
+            margin: 5px 0;
+        }
+
+        .action-box p {
+            color: #777;
+            margin-bottom: 0;
+        }
+
+        /* PDF */
+        .pdf-viewer {
+            width: 100%;
+            height: 75vh;
+            min-height: 500px;
+            border: none;
+            border-radius: 8px;
+        }
+
+        /* 팝업 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.55);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 30px;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 22px;
+            top: 12px;
+            font-size: 32px;
+            color: #777;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        /* 모바일 */
+        @media (max-width: 700px) {
+
+            header h1 {
+                font-size: 24px;
+            }
+
+            .class-list {
+                grid-template-columns: 1fr;
+            }
+
+            .action-area {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-box {
+                padding: 20px;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+<header>
+    <h1>2026학년도 수업공개의 날</h1>
+    <p>장당중학교 AI·디지털 교육 및 공개수업</p>
+</header>
+
+
+<div class="container">
+
+    <div class="section-title">
+        공개수업 안내
+    </div>
+
+
+    <!-- 수업 5개가 여기에 자동으로 생성됩니다 -->
+    <div class="class-list" id="classList"></div>
+
+
+    <!-- 선택한 수업의 상세 정보 -->
+    <div class="detail-box" id="classDetail">
+
+        <h2 class="detail-title" id="detailTitle"></h2>
+
+        <table class="info-table">
+
+            <tr>
+                <th>과목</th>
+                <td id="detailSubject"></td>
+            </tr>
+
+            <tr>
+                <th>수업 교사</th>
+                <td id="detailTeacher"></td>
+            </tr>
+
+            <tr>
+                <th>장소</th>
+                <td id="detailPlace"></td>
+            </tr>
+
+            <tr>
+                <th>단원명</th>
+                <td id="detailUnit"></td>
+            </tr>
+
+            <tr>
+                <th>학습 목표</th>
+                <td id="detailGoal"></td>
+            </tr>
+
+        </table>
+
+
+        <div class="action-area">
+
+            <!-- 참관록 -->
+            <div class="action-box" onclick="openObservationForm()">
+
+                <div class="action-icon">📝</div>
+
+                <h3>참관록 작성</h3>
+
+                <p>
+                    수업 참관 후 참관록을 작성합니다.
+                </p>
+
+            </div>
+
+
+            <!-- 장소 안내도 -->
+            <div class="action-box" onclick="openMap()">
+
+                <div class="action-icon">🗺️</div>
+
+                <h3>수업장소 안내도</h3>
+
+                <p>
+                    수업 장소 및 이동 경로를 확인합니다.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================= -->
+<!-- 장소 안내도 팝업 -->
+<!-- ============================= -->
+
+<div class="modal" id="mapModal">
+
+    <div class="modal-content">
+
+        <span class="close" onclick="closeMap()">
+            &times;
+        </span>
+
+        <h2>수업장소 안내도</h2>
+
+        <iframe
+            class="pdf-viewer"
+            src="map.pdf"
+            title="수업장소 안내도">
+        </iframe>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* =====================================================
+   ① 수업 정보
+   =====================================================
+
+   ★ 실제 공개수업 정보로 수정하세요.
+   ===================================================== */
+
+
+const classes = [
+
+    {
+        id: 1,
+
+        subject: "정보",
+
+        teacher: "김규호",
+
+        place: "3층 컴퓨터실",
+
+        unit: "인공지능과 문제 해결",
+
+        goal:
+        "인공지능의 원리를 이해하고 생성형 인공지능을 활용하여 문제를 해결할 수 있다."
+    },
+
+
+    {
+        id: 2,
+
+        subject: "국어",
+
+        teacher: "교사명",
+
+        place: "2층 국어실",
+
+        unit: "단원명을 입력하세요",
+
+        goal:
+        "학습 목표를 입력하세요."
+    },
+
+
+    {
+        id: 3,
+
+        subject: "수학",
+
+        teacher: "교사명",
+
+        place: "2층 수학교실",
+
+        unit: "단원명을 입력하세요",
+
+        goal:
+        "학습 목표를 입력하세요."
+    },
+
+
+    {
+        id: 4,
+
+        subject: "과학",
+
+        teacher: "교사명",
+
+        place: "1층 과학실",
+
+        unit: "단원명을 입력하세요",
+
+        goal:
+        "학습 목표를 입력하세요."
+    },
+
+
+    {
+        id: 5,
+
+        subject: "영어",
+
+        teacher: "교사명",
+
+        place: "2층 영어실",
+
+        unit: "단원명을 입력하세요",
+
+        goal:
+        "학습 목표를 입력하세요."
+    }
+
+];
+
+
+/* =====================================================
+   ② Google Form 주소
+   =====================================================
+
+   ★ Google Form을 만든 뒤 주소를 넣으세요.
+
+   예:
+   https://docs.google.com/forms/d/e/ABC123/viewform
+
+   ===================================================== */
+
+
+const GOOGLE_FORM_URL =
+    "여기에_구글폼_주소_입력";
+
+
+/* =====================================================
+   ③ 페이지에 수업 카드 만들기
+   ===================================================== */
+
+
+const classList =
+    document.getElementById("classList");
+
+
+classes.forEach(function(item) {
+
+    const card =
+        document.createElement("div");
+
+    card.className =
+        "class-card";
+
+
+    card.innerHTML = `
+
+        <div class="class-number">
+            공개수업 ${item.id}
+        </div>
+
+        <h3>
+            ${item.subject} · ${item.teacher}
+        </h3>
+
+        <p>
+            📍 ${item.place}
+        </p>
+
+        <p>
+            📖 ${item.unit}
+        </p>
+
+    `;
+
+
+    card.onclick = function() {
+
+        showClass(item);
+
+    };
+
+
+    classList.appendChild(card);
+
+});
+
+
+/* =====================================================
+   ④ 선택한 수업 보여주기
+   ===================================================== */
+
+
+let selectedClass = null;
+
+
+function showClass(item) {
+
+    selectedClass = item;
+
+
+    document.getElementById("detailTitle")
+        .textContent =
+        `${item.subject} · ${item.teacher}`;
+
+
+    document.getElementById("detailSubject")
+        .textContent =
+        item.subject;
+
+
+    document.getElementById("detailTeacher")
+        .textContent =
+        item.teacher;
+
+
+    document.getElementById("detailPlace")
+        .textContent =
+        item.place;
+
+
+    document.getElementById("detailUnit")
+        .textContent =
+        item.unit;
+
+
+    document.getElementById("detailGoal")
+        .textContent =
+        item.goal;
+
+
+    document.getElementById("classDetail")
+        .classList.add("active");
+
+
+    document.getElementById("classDetail")
+        .scrollIntoView({
+            behavior: "smooth"
+        });
+
+}
+
+
+/* =====================================================
+   ⑤ 참관록 열기
+   ===================================================== */
+
+
+function openObservationForm() {
+
+    if (!selectedClass) {
+
+        alert("먼저 참관할 수업을 선택해주세요.");
+
+        return;
+    }
+
+
+    /*
+       Google Form에 '미리 채워진 링크'를
+       사용할 경우 아래 주소를 사용합니다.
+
+       수업별 링크를 따로 넣을 수도 있습니다.
+    */
+
+
+    const formLinks = {
+
+        1: "여기에_수업1_참관록_링크",
+
+        2: "여기에_수업2_참관록_링크",
+
+        3: "여기에_수업3_참관록_링크",
+
+        4: "여기에_수업4_참관록_링크",
+
+        5: "여기에_수업5_참관록_링크"
+
+    };
+
+
+    const link =
+        formLinks[selectedClass.id];
+
+
+    window.open(
+        link,
+        "_blank"
+    );
+
+}
+
+
+/* =====================================================
+   ⑥ 장소 안내도 열기
+   ===================================================== */
+
+
+function openMap() {
+
+    document.getElementById("mapModal")
+        .style.display = "block";
+
+}
+
+
+function closeMap() {
+
+    document.getElementById("mapModal")
+        .style.display = "none";
+
+}
+
+
+/* =====================================================
+   ⑦ 팝업 바깥 클릭
+   ===================================================== */
+
+
+window.onclick = function(event) {
+
+    const mapModal =
+        document.getElementById("mapModal");
+
+
+    if (event.target === mapModal) {
+
+        closeMap();
+
+    }
+
+};
+
+
+</script>
+
+</body>
+</html>
